@@ -125,7 +125,7 @@ tail(panda_data)
 
 ## Selecting Columns 
 
-The function `select()` is a powerful tool for selecting columns of interest.  You must specify the dataset you want to query and then also provide an expression for selecting columns of interest (`select(.data, expression)`).  A few examples are provided below 
+The function `select()` is a powerful tool for selecting columns of interest.  You must specify the dataset you want to query and then also provide an expression for selecting columns of interest (`select(.data, expression)`).  A few examples are provided below: 
 
 ```{r, warning = F, message = F}
 # select column called panda_name
@@ -167,19 +167,24 @@ select(panda_data, !c(panda_name, age))
 
 ## Filtering Data
 
-`Filter()` is similar to `select()`, except that you are selecting specific rows that satisfy a specific requirement based on the column value.
+`Filter()` is similar to `select()`, except that you are selecting specific rows that satisfy a requirement based on a column value.  This function is very similar to the base function `subset()`.  A few examples on how to use `filter()` are provided below: 
 
 ![Artwork by [Allison Horst](https://allisonhorst.com/allison-horst)](dplyr_filter.png)
 
 <br>
-Words here
 
-```{r}
-filter(panda_data, age %in% c(4,5))
-filter (panda_data, age>5) # select rows that have age>5
-filter(panda_data, age>5 | weight_kg>100) # select rows that have age>5 OR weight_kg >100 
-filter (panda_data, age>5 & base =="CD") # select rows that have age>5 AND base column has CD has entry
-filter(panda_data, age %in% c(4, 6)) # select rows that have age included a user defined list
+```{r, warning=F, message=F}
+# Select rows where pandas are greater than or equal to 5 years of age
+filter(panda_data, age >= 5)
+
+# select rows that have age>5 OR weight_kg >100 
+filter(panda_data, age > 5 | weight_kg > 100)
+
+# select rows that have age>5 AND base column has CD has entry
+filter(panda_data, age > 5 & base == "CD") 
+
+# Select rows where the panda age is defined by a few values.  Note the use of the %in% function.
+filter(panda_data, age %in% c(4,5,7))
 ```
 
 **Questions**:
@@ -195,79 +200,155 @@ filter(panda_data, is.na(genetic_value2))
 filter(panda_data, panda_name == 'bao_bao' | panda_name == 'bei_bei') 
 ```
 
-##  pipe operator `%>%`   
-This operator allows you to pipe the output from one function to the input of the next function. Instead of nesting functions (reading from the inside to the outside), the idea of of piping is to read the functions from left to right. It can also help you avoid creating and saving a lot of intermediate variables that you dont need to keep
+##  Using the Pipe Operator 
 
-```{r}
-pipe_result<- panda_data %>%
+Piping (`%>%`) allows the user to combine the output from one function to the input of another.  Thus, instead of nesting functions (reading from the inside to the outside), piping reads functions from left to right (i.e., the way we normally read things). As a result, reading piped code can be more intuitive and can help avoid creating and saving a lot of intermediate variables that you don't need.
+
+```{r, message=F, warning=F}
+# Use a simple pipe to select the panda name and it's sex, and output the result.
+# Create a new object named 'pipe_result'
+pipe_result <- panda_data %>%
   select(panda_name, sex) %>%
   head()
+
+# Output the result to the screen 
 pipe_result
 ```
-> Question: Try to use pipe operator to 1. select all columns contain "genetic" in their names, 2. select the rows with genetic_value1  >80 AND genetic_value2 <90
 
-### `arrange()` 
-Arrange or re-order rows based on their value, the rows are arranged by default in ascending order  
+**Questions**: 
+
+1. Use a pipe operator to select all columns containing "genetic" in their names, but only select rows that have a genetic_value1 >80 AND genetic_value2 <90.  Don't create a new object when you create the query (i.e., just print the result to your screen).
+2. What do you think will happen if you filter based on a field that hasn't been selected?  For instance, select all columns containing "genetic", but select the rows where animals weigh > 90 kg.
+
+```{r, message=F, warning=F, eval=F, echo=F}
+# Select columns that contain genetic and then selection values based on these columns
+panda_data %>% 
+  select(contains("genetic")) %>% 
+  filter(genetic_value1 > 80 & genetic_value2 < 90)
+
+# Example of filtering a column that doesn't exist after selecting
+# The field doesn't exist and will cause an error
+# panda_data %>% 
+#   select(contains("genetic")) %>% 
+#   filter(weight_kg > 90)
+```
+
+## Mutate
+
+One of the most useful functions in `dplyr` package is `mutate()`.  Mutate allows the user to create new column(s), populating the columns with values that you define or from information in columns that already exist.  You can also use `mutate()` to control which columns are retained in the new object that you create by setting the `.keep` argument.
+
+![Artwork by [Allison Horst](https://allisonhorst.com/allison-horst)](dplyr_mutate.png)
+
+<br>
+
+```{r, warning=F, message=F}
+# Create a new column, based on values from other columns that exist
+# By default, keep = all
+new_col_ex1 <- panda_data %>%
+  mutate(genetic_value_new = genetic_value1 - genetic_value2,
+         .keep = "all")  
+# Print
+new_col_ex1
+
+# You can create multiple columns at once.  Best to put each new column on a separate line.  This simply makes the code more readable.
+new_col_ex2 <- panda_data %>%
+	mutate(genetic_dif = genetic_value1 - genetic_value2, 
+	       weight_g = weight_kg * 1000) 
+# Print
+new_col_ex2
+```
+
+**Question**:
+
+1. Create a new column in `panda_data` called `zero` and give it a value of 0?
+
+```{r, warning=F, message=F, eval=F, echo=F} 
+# Create a new column called zero
+panda_data %>%
+  mutate(zero = 0)
+```
+
+## Arrange, Relocate, and Rename
+
+It is common to receive data in ways that we want to change or alter.  For instance, we might want to change the order of the columns, re-order the rows based on particular column values, or we may want to change the column headings.  `Mutate()` includes options to change the order of columns that you create (see `.before` and `.after` in the `help` for the function).  `Relocate()` can be used move columns around using the `.before` and `.after` commands, `arrange()` can be used to order the rows, and `rename()` can be used to give new names to column headings.  By default, `arrange` will arrange the selecting column in ascending order.  We can use `desc()` to arrange the column in descending order.
+
+![Artwork by [Allison Horst](https://allisonhorst.com/allison-horst)](dplyr_relocate.png)
+
+<br>
+
 ```{r}
-order_data1<- panda_data %>% 
-	arrange(ID) 
-order_data1
+# Arrange the panda_data by panda_name in descending order
+# Place the sex column after the ID column
+order_data_ex1 <- panda_data %>% 
+	arrange(desc(panda_name)) %>% 
+  relocate(sex, .after = ID)
+# Print
+head(order_data_ex1)
 
-order_data2<- panda_data %>% 
+# Arrange the panda_data by genetic_value 1 and genetic_value2 after select the columns that start with 'genetic'
+# Rename the genetic_value1 column to gen_val1
+order_data_ex2 <- panda_data %>% 
 	select(starts_with("genetic")) %>%
-	arrange(genetic_value1, genetic_value2) %>%
-	head
-order_data2
-# Now we learn pipe operator, can you understand what order_data1 and order_data2 are producing? 
+	arrange(genetic_value1, genetic_value2) %>% 
+  rename(gen_val1 = genetic_value1)
+# Print
+head(order_data_ex2)
 ```
-> Question: Can you arrange the table first by age and then by panda weight in decending order?
 
-###  `mutate()`   
-Create new column(s) and define their values
-```{r}
-new_col<- panda_data %>%
-	mutate(new_col = genetic_value1 - genetic_value2)  # before = is the name of the new column we are producing, and after = is how we want to give its value
-new_col
+**Question**: 
 
-new_col2<- panda_data %>%
-	mutate(genetic_dif = genetic_value1 - genetic_value2, weight_g= weight_kg *1000) # you can create multiple columns at once 
-new_col2
+1. Arrange the panda_data by age and then by panda weight, putting the year column before age and the base column after the last column?  Rename the weight column to `panda_wgt_kg`.
+
+```{r, message=F, warning=F, echo=F, eval=F}
+# Arrange the panda dataset by age and weight, relocating columns and renaming the weight column
+panda_data %>% 
+  arrange(age, weight_kg) %>% 
+  relocate(year, .before = age) %>% 
+  relocate(base, .after = last_col()) %>% 
+  rename(panda_wgt_kg = weight_kg)
 ```
-> Can you create a new column call zero and give it a value of 0 ?
 
+## Summarize
 
-###  `summarise()`   
-Calculate summary statistics among all rows or rows within certain grouping, often used in combination with `group_by()` 
-```{r}
-sum_table <- panda_data%>% 
-summarise (mean(weight_kg))
+Summary statistics are easily calculated using the `summarise()` function (note: `summarize()` will also work).  The summary statistics will be calculated among all rows in the dataframe, unless specified otherwise.  `Summarize()` is often used in combination with `group_by()` (see below for more information).  Various useful summary functions are provided in the `help` documentation for the function.
+
+```{r, message=F, warning=F}
+# Calculate the mean weight of the pandas and provide a count.
+sum_table <- panda_data %>% 
+  summarise(mean_wgt = mean(weight_kg),
+            n = n())
+# Print summary table
 sum_table
 
-sum_table2 <- panda_data%>% 
-summarise (avg_wt= mean(weight_kg), min_wt= min(weight_kg))
-sum_table2
+# Calculate the avg weight and minimum weight.  Don't create a new object.
+panda_data %>% 
+  summarise(avg_wt = mean(weight_kg), 
+            min_wt = min(weight_kg))
 ```
 
+## Grouping Functions
 
-### `group_by()`   
-Divide data rows into groups based on grouping column(s) provided, often used in combination with other functions which define what you do with them after placing them in groups. When `group_by()` and `summarise()` are used together, you are essentially telling R to separate rows into different groups, and for each groups you use `summarise()` to generate a series of summary statistics that characterize the column values.    
-```{r}
-group_summary<- panda_data %>%
+`Group_by()` can by used to divide data rows into groups based on grouping column(s) that we specify.  This function is often used in combination with others which define what you do with them after placing them in groups. When `group_by()` and `summarise()` are used together, you are essentially telling R to separate rows into different groups, and for each groups you use `summarise()` to generate a series of summary statistics that characterize the column values.    
+
+```{r, warning=F, message=F}
+# Similar to above, calculate average and minimum weight, but summarize based on 'base' column.  Include a count of each group.
+panda_data %>%
   group_by(base) %>%
-  summarise(avg_wt= mean(weight_kg), 		min_wt= min(weight_kg))
-group_summary
-```
+  summarise(avg_wt = mean(weight_kg),
+            min_wt = min(weight_kg),
+            n = n())
 
-You can also create groups by the combination of two or multiple columns
-```{r}
-group_summary2<- panda_data %>%
+# Group summaries can also be calculated across muultiple groups.
+# Here, we calculate the same as above, but based on base and sex
+panda_data %>%
   group_by(base, sex) %>%
-  summarise(avg_wt= mean(weight_kg), 		min_wt= min(weight_kg))
-group_summary2
+  summarise(avg_wt = mean(weight_kg),
+            min_wt= min(weight_kg),
+            n = n())
 ```
 
+##  Joining Tables
 
-###  Join table  
 read in another table
 ```{r}
 panda_data_med<-read.csv(file="Data/panda_data_med.csv")
@@ -288,26 +369,6 @@ left_join(panda_data, panda_data_med, by = c("year" = "year_vaccination", "ID" =
 Other than `left_join()` there are a few other join functions that would join table differently. Sometimes you will find them useful for a specific table you want to make, but in general, you can reply on `left_join()` for most of the job.   
 * `right_join()`: similar to left join, it keeps all records from the right table instead.  
 * `inner_join()`: return only the matched records from both tables.  
-* `full_join()`: return all records in both tables.  
+* `full_join()`: return all records in both tables.
 
-
-### Optional: Convert between wide and long table
-
-*  `gather()`  
-Convert wide table to long table
-```{r}
-library(tidyr)
-```
-
-```{r}
-to_longtable<- select(panda_data, panda_name, ID, contains("genetic")) %>%
-  gather( key=genetic_number, value=genetic_value,  genetic_value1:genetic_value3)
-head(to_longtable)
-```
-
-*  `spread()`   
-Does the opposite, convert long table to wide table
-```{r}
-to_widetable<- spread(panda_data_med, vaccine_type, year_vaccination)
-head(to_widetable)
-```
+# Assignment

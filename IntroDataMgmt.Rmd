@@ -389,12 +389,95 @@ head(panda_join_ex2)
 
 # Excercise
 
-Text here
+Now that you've been exposed to a few functions to better manage data in R, we will reinforce these tools by asking you to apply them to memory by practicing on a dataset of wildlife counts collected across the Naboisho conservancy.  Located in your `Data` folder and named `SampleData.csv`, these data are derived from our publication in the African Journal of Ecology that forms the foundation for this project.
 
 <div style="float:right">
 <img width="150" height="150" src="DataScience.png">
 </div>
 
-```{r, warning=F, message=F, echo=T, eval=T}
+Upon import you will note that the dataset is comprised of 5 columns:
 
+* `Date`: The date the transect was conducted
+* `Species`: Species name
+* `GroupSize`: Total number of animals in the counted group
+* `TransectID`: Name of each transect
+* `Year`: Year in which the data were collected
+
+Please create a script named `Exercise1_DataMgmt.R`.  Format the script like we have instructed to do so in this lecture with your `Name`, `Date`, and `Description`.  Then, read in the data and create a fully commented code to answer the following questions:   
+
+1) What are the dimensions of the dataset?  How many rows and columns exist?
+2) What is the data structure of each variable?
+3) How many species were counted?
+4) How many transects are there and what are the names of these transects?
+5) How many unique survey days were completed?  What is the range of dates?
+
+Please use a %>% for the followings questions (you don't need to save the output):
+
+6) What is the maximum group size of giraffe?
+7) What is the mean group size of wildebeest per year?  Include the number of observations in the calculation.
+8) What is the total count of impala observed in 2018?
+9) What is the total number of groups of each species per year?
+10) What is the total number of groups and the mean group size of each species, per year, and per transect?
+
+**Note**: We didn't go over every function to answer these questions.  You may need to troubleshoot and search the web to find the appropriate function.  Remember to use `R-Cran` when searching to limit/fine tune your search.  Using `dplyr` in your search term can also help in narrowing down your search.
+
+The data used for this exercise can be referenced as:
+
+Crego RD, Wells HBM, Connette G, Stabach JA, Soit N, Thompson S. 2023. Monitoring spatiotemporal dynamics of large herbivores across an African rangeland using hierarchical multi-species distance sampling. African Journal of Ecology. [doi:10.1111/aje.13219](https://onlinelibrary.wiley.com/doi/10.1111/aje.13219)
+
+```{r, warning=T, message=T, echo=F, eval=F}
+# Read in the CSV
+survey_sample <- read.csv(file = "Data/SampleData.csv")
+
+# Look at the data
+head(survey_sample)
+
+# Question 1: What are the dimensions of the dataset?  How many rows and columns?
+dim(survey_sample)
+nrow(survey_sample)
+ncol(survey_sample)
+
+# Question 2: What is the data structure of each variable?
+str(survey_sample)
+
+# Question 3: How many species were counted?  
+length(unique(survey_sample$Species))
+n_distinct(survey_sample$Species)
+
+# Question 4: How many transects are there and what are the names of these transects?  Same process, but a different column.
+n_distinct(survey_sample$TransectID)
+unique(survey_sample$TransectID)
+
+# Question 5: How many unique survey days were completed?  What is the range of dates?
+length(unique(survey_sample$Date))
+min(survey_sample$Date)
+max(survey_sample$Date)
+
+# Question 6: What is the maximum group size of giraffe?
+survey_sample %>% 
+  filter(Species == "Giraffe") %>% 
+  summarise(max_grp = max(GroupSize))
+
+# Question 7: What is the mean group size of wildebeest per year?  Include the number of observations in the calculation.
+survey_sample %>% 
+  filter(Species == "Wildebeest") %>% 
+  group_by(Date) %>% 
+  summarise(mean_grp = mean(GroupSize),
+            n_obs = n()) # This counts the observations, it is not a sum of the observations.
+
+# Question 8: What is the total count of impala observed in 2018?
+survey_sample %>% 
+  filter(Species == "Impala" & Year == "2018") %>%
+  summarise(sum_impala = sum(GroupSize))
+  
+# Question 9: What is the total number of groups of each species per year?
+survey_sample %>% 
+  group_by(Species, Year) %>% 
+  summarise(Total_Grps = n())
+  
+# Question 10: What is the total number of groups and the mean group size of each species, per year, and per transect?
+survey_sample %>% 
+  group_by(Species, Year, TransectID) %>%
+    summarise(Total_Grps = n(),
+              Mean_Grps = mean(GroupSize))
 ```

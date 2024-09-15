@@ -1,16 +1,19 @@
 ---
-title: "Introduction to Data Management in R"
+pdf_document: default
 author: "Smithsonian's National Zoo & Conservation Biology Institute"
-date: '`r format(Sys.time(), "%d %B %Y")`'
+date: "`r format(Sys.time(), "%d %B %Y")`"
 output:
   html_document:
     toc: true
     toc_depth: 4
-    toc_float: 
+    toc_float:
       collapsed: true
       smooth_scroll: true
     number_sections: false
-pdf_document: default
+  pdf_document:
+    toc: true
+    toc_depth: '4'
+title: "Introduction to Data Management in R"
 ---
 
 ```{r setup, include=FALSE}
@@ -63,7 +66,7 @@ At the top of your script, provide brief information that describes the content 
 Running code via an R script is different than running code in the Console.  To interpret and run the code you've written, R needs you to send the code from the script to the Console.  Some common ways to run your code include:
 
 1. Highlight the line of code you want to run and use the shortcut `Ctrl` + `Enter` (Windows) or `command` + `return` (Mac).  
-2. Highlight your code a physically click the `Run` button in the top right of the Source pane with your mouse.
+2. Highlight your code and physically click the `Run` button in the top right of the Source pane with your mouse.
 
 ## Clearing your Workspace
 

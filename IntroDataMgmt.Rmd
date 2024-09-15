@@ -1,7 +1,7 @@
 ---
 pdf_document: default
 author: "Smithsonian's National Zoo & Conservation Biology Institute"
-date: "`r format(Sys.time(), "%d %B %Y")`"
+date: '`r format(Sys.time(), "%d %B %Y")`'
 output:
   html_document:
     toc: true
@@ -119,7 +119,7 @@ head(panda_data)
 4. What are the dimensions of the dataframe?  How many rows and columns are there?
 5. Can you guess how you might look at the last few rows of the dataframe?
 
-```{r, eval = F, echo = F, warning=F, message=F}
+```{r, warning=F, message=F, eval=F, echo =F}
 # Print the first 3 rows
 head(panda_data, n = 3)
 

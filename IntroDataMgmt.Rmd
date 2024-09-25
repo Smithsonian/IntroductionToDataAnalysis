@@ -119,7 +119,7 @@ head(panda_data)
 4. What are the dimensions of the dataframe?  How many rows and columns are there?
 5. Can you guess how you might look at the last few rows of the dataframe?
 
-```{r, warning=F, message=F, eval=F, echo =F}
+```{r, warning=F, message=F, eval=F, echo=F}
 # Print the first 3 rows
 head(panda_data, n = 3)
 
@@ -168,7 +168,7 @@ select(panda_data, starts_with("genetic"))
 1. Select all the columns that contain "value" in the column name.
 2. Select or exclude two columns: `panda_name` and `age`.  
 
-```{r, warning = F, message = F, eval = F, echo = F}
+```{r, warning = F, message = F, eval=F, echo=F}
 # Select all the columns that contain "value" in the column name.
 select(panda_data, contains("value")) 
 
@@ -204,7 +204,7 @@ filter(panda_data, age %in% c(4,5,7))
 1: Select rows with `NA` in the genetic_value2 column.   
 2: Select rows whose panda_name column are `bao_bao` or `bei_bei`.
 
-```{r, warning = F, message = F, eval = F, echo = F}
+```{r, warning = F, message = F, eval=F, echo=F}
 # Select rows with `NA` in the genetic_value2 column. 
 filter(panda_data, is.na(genetic_value2)) 
 
@@ -274,7 +274,7 @@ new_col_ex2
 
 1. Create a new column in `panda_data` called `zero` and give it a value of 0?
 
-```{r, warning=F, message=F, eval=F, echo=F} 
+```{r, warning=F, message=F, eval=F, echo=F}
 # Create a new column called zero
 panda_data %>%
   mutate(zero = 0)
@@ -311,7 +311,7 @@ head(order_data_ex2)
 
 1. Arrange the panda_data by age and then by panda weight, putting the year column before age and the base column after the last column?  Rename the weight column to `panda_wgt_kg`.
 
-```{r, message=F, warning=F, echo=F, eval=F}
+```{r, message=F, warning=F, eval=F, echo=F}
 # Arrange the panda dataset by age and weight, relocating columns and renaming the weight column
 panda_data %>% 
   arrange(age, weight_kg) %>% 
@@ -428,7 +428,7 @@ The data used for this exercise can be referenced as:
 
 Crego RD, Wells HBM, Connette G, Stabach JA, Soit N, Thompson S. 2023. Monitoring spatiotemporal dynamics of large herbivores across an African rangeland using hierarchical multi-species distance sampling. African Journal of Ecology. [doi:10.1111/aje.13219](https://onlinelibrary.wiley.com/doi/10.1111/aje.13219)
 
-```{r, warning=T, message=T, echo=F, eval=F}
+```{r, warning=T, message=T, eval=F, echo=F}
 # Read in the CSV
 survey_sample <- read.csv(file = "Data/SampleData.csv")
 
@@ -443,45 +443,47 @@ ncol(survey_sample)
 # Question 2: What is the data structure of each variable?
 str(survey_sample)
 
-# Question 3: How many species were counted?  
-length(unique(survey_sample$Species))
+# Question 3: How many species were counted?
 n_distinct(survey_sample$Species)
+length(unique(survey_sample$Species))
 
 # Question 4: How many transects are there and what are the names of these transects?  Same process, but a different column.
 n_distinct(survey_sample$TransectID)
 unique(survey_sample$TransectID)
 
 # Question 5: How many unique survey days were completed?  What is the range of dates?
+n_distinct(survey_sample$Date)
 length(unique(survey_sample$Date))
 min(survey_sample$Date)
 max(survey_sample$Date)
+range(survey_sample$Date)
 
 # Question 6: What is the maximum group size of giraffe?
-survey_sample %>% 
-  filter(Species == "Giraffe") %>% 
+survey_sample %>%
+  filter(Species == "Giraffe") %>%
   summarise(max_grp = max(GroupSize))
 
 # Question 7: What is the mean group size of wildebeest per year?  Include the number of observations in the calculation.
-survey_sample %>% 
-  filter(Species == "Wildebeest") %>% 
+survey_sample %>%
+  filter(Species == "Wildebeest") %>%
   summarise(mean_grp = mean(GroupSize),
             n_obs = n(), # This counts the observations, it is not a sum of the observations.
-            .by=Date) 
+            .by=Year)
 
 # Question 8: What is the total count of impala observed in 2018?
-survey_sample %>% 
+survey_sample %>%
   filter(Species == "Impala" & Year == "2018") %>%
   summarise(sum_impala = sum(GroupSize))
-  
-# Question 9: What is the total number of groups of each species per year?
-survey_sample %>% 
+
+# Question 9: What is the total number of groups of each species per year?  Note, not the total animals counted.
+survey_sample %>%
   summarise(Total_Grps = n(),
             .by=c(Species, Year))
-  
+
 # Question 10: What is the total number of groups and the mean group size of each species, per year, and per transect?  Sort these by Species, TransectID, and Year
-survey_sample %>% 
+survey_sample %>%
   summarise(Total_Grps = n(),
             Mean_Grps = mean(GroupSize),
-            .by = c(Species, Year, TransectID)) %>% 
+            .by = c(Species, Year, TransectID)) %>%
   arrange(Species, TransectID, Year)
 ```
